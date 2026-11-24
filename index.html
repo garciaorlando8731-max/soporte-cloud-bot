@@ -1,72 +1,29 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Soporte Técnico Cloud - Emergencias</title>
-    <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f4f7f6; margin: 0; padding: 20px; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .chat-container { width: 100%; max-width: 500px; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; overflow: hidden; height: 80vh; }
-        .chat-header { background: #004080; color: white; padding: 15px; text-align: center; font-weight: bold; font-size: 1.1rem; }
-        .chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; background: #fafafa; }
-        .message { padding: 10px 14px; border-radius: 8px; max-width: 80%; line-height: 1.4; font-size: 0.95rem; white-space: pre-line; }
-        .user-msg { background: #004080; color: white; align-self: flex-end; border-bottom-right-radius: 2px; }
-        .bot-msg { background: #e2e8f0; color: #1a202c; align-self: flex-start; border-bottom-left-radius: 2px; }
-        .chat-input-area { display: flex; padding: 10px; background: white; border-top: 1px solid #ddd; }
-        .chat-input-area input { flex: 1; padding: 10px; border: 1px solid #ccc; border-radius: 6px; outline: none; font-size: 0.95rem; }
-        .chat-input-area button { background: #004080; color: white; border: none; padding: 10px 18px; margin-left: 8px; border-radius: 6px; cursor: pointer; font-weight: bold; }
-        .chat-input-area button:hover { background: #002b5c; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Soporte Técnico Cloud - Emergencias</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-    <div class="chat-container">
-        <div class="chat-header">
-            🛠️ Centro de Soporte Cloud (Plataforma Escolar)
-        </div>
-        <div id="chatMessages" class="chat-messages">
-            <div class="message bot-msg">👋 Hola. Si la plataforma escolar presenta fallas o caídas imprevistas, escribe tu problema aquí para recibir asistencia automática.</div>
-        </div>
-        <div class="chat-input-area">
-            <input type="text" id="userInput" placeholder="Ej: La plataforma se cayó..." autofocus>
-            <button onclick="enviarReporte()">Enviar</button>
-        </div>
+  <div class="chat-container">
+    <div class="chat-header">
+      🛠️ Centro de Soporte Cloud (Plataforma Escolar)
     </div>
 
-    <script>
-        const inputField = document.getElementById('userInput');
-        inputField.addEventListener('keypress', function (e) {
-            if (e.key === 'Enter') enviarReporte();
-        });
+    <div id="chatMessages" class="chat-messages">
+      <div class="message bot-msg">
+        👋 Hola. Si la plataforma escolar presenta fallas o caídas imprevistas, escribe tu problema aquí para recibir asistencia automática.
+      </div>
+    </div>
 
-        async function enviarReporte() {
-            const texto = inputField.value.trim();
-            if (!texto) return;
+    <div class="chat-input-area">
+      <input type="text" id="userInput" placeholder="Ej: La plataforma se cayó..." autofocus>
+      <button id="btnEnviar" type="button">Enviar</button>
+    </div>
+  </div>
 
-            const chatMessages = document.getElementById('chatMessages');
-            chatMessages.innerHTML += `<div class="message user-msg">${texto}</div>`;
-            inputField.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            try {
-                const response = await fetch('/api/reportar', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ mensaje: texto })
-                });
-
-                const data = await response.json();
-                if (data.status === 'exito') {
-                    chatMessages.innerHTML += `<div class="message bot-msg">${data.reporte.solucion}</div>`;
-                } else {
-                    chatMessages.innerHTML += `<div class="message bot-msg">⚠️ Ocurrió un error al procesar el reporte.</div>`;
-                }
-            } catch (err) {
-                chatMessages.innerHTML += `<div class="message bot-msg">⚠️ Error de conexión con el servidor cloud.</div>`;
-            }
-
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-        }
-    </script>
+  <script src="app.js"></script>
 </body>
 </html>
