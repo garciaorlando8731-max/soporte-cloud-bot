@@ -1,3 +1,27 @@
+* {
+  box-sizing: border-box;
+  font-family: Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  padding: 20px;
+  background-color: #f3f5f8;
+  display: flex;
+  justify-content: center;
+}
+
+.chat-container,
+#chat-container,
+.contenedor-chat {
+  width: 100%;
+  max-width: 720px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
 .mensaje-usuario {
   background-color: #0b4a8b;
   color: #ffffff;
