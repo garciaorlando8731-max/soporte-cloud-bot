@@ -93,3 +93,25 @@ body {
 .chat-input-area button:hover {
   background: #002b5c;
 }
+.mensaje-usuario {
+  background-color: #0b4a8b;
+  color: #ffffff;
+  padding: 10px 14px;
+  border-radius: 12px 12px 2px 12px;
+  margin: 8px 0 8px auto;
+  max-width: 80%;
+  width: fit-content;
+  white-space: pre-line;
+}
+
+.mensaje-bot {
+  background-color: #e9eef5;
+  color: #111827;
+  padding: 10px 14px;
+  border-radius: 12px 12px 12px 2px;
+  margin: 8px auto 8px 0;
+  max-width: 85%;
+  width: fit-content;
+  line-height: 1.4;
+  white-space: pre-line;
+}
