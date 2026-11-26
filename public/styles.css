@@ -1,95 +1,20 @@
-body {
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  background-color: #f4f7f6;
-  margin: 0;
-  padding: 20px;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100vh;
-}
-
-.chat-container {
-  width: 100%;
-  max-width: 500px;
-  background: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-  height: 80vh;
-}
-
-.chat-header {
-  background: #004080;
-  color: white;
-  padding: 15px;
-  text-align: center;
-  font-weight: bold;
-  font-size: 1.1rem;
-}
-
-.chat-messages {
-  flex: 1;
-  padding: 15px;
-  overflow-y: auto;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  background: #fafafa;
-}
-
-.message {
+.mensaje-usuario {
+  background-color: #0b4a8b;
+  color: #ffffff;
   padding: 10px 14px;
-  border-radius: 8px;
+  border-radius: 12px 12px 2px 12px;
+  margin: 8px 0 8px auto;
   max-width: 80%;
+  width: fit-content;
+}
+
+.mensaje-bot {
+  background-color: #e9eef5;
+  color: #111827;
+  padding: 10px 14px;
+  border-radius: 12px 12px 12px 2px;
+  margin: 8px auto 8px 0;
+  max-width: 85%;
+  width: fit-content;
   line-height: 1.4;
-  font-size: 0.95rem;
-  white-space: pre-line;
-}
-
-.user-msg {
-  background: #004080;
-  color: white;
-  align-self: flex-end;
-  border-bottom-right-radius: 2px;
-}
-
-.bot-msg {
-  background: #e2e8f0;
-  color: #1a202c;
-  align-self: flex-start;
-  border-bottom-left-radius: 2px;
-}
-
-.chat-input-area {
-  display: flex;
-  padding: 10px;
-  background: white;
-  border-top: 1px solid #ddd;
-}
-
-.chat-input-area input {
-  flex: 1;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 6px;
-  outline: none;
-  font-size: 0.95rem;
-}
-
-.chat-input-area button {
-  background: #004080;
-  color: white;
-  border: none;
-  padding: 10px 18px;
-  margin-left: 8px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.chat-input-area button:hover {
-  background: #002b5c;
 }
