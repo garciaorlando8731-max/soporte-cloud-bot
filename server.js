@@ -6,7 +6,7 @@ const crypto = require('crypto');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const MAX_MESSAGE_LENGTH = 500;
+const MAX_MESSAGE_LENGTH = 2000;
 const MIN_INTERVAL_MS = 600;
 const SESSION_TTL_MS = 30 * 60 * 1000;
 const MAX_HISTORY = 30;
@@ -14,7 +14,7 @@ const MAX_HISTORY = 30;
 // Almacén en memoria aislado por sesión
 const sessions = new Map();
 
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '50kb' }));
 
 // Servir archivos estáticos desde public/ y respaldo en raíz
 const publicDir = path.join(__dirname, 'public');
@@ -95,7 +95,7 @@ function isOutOfDomain(text) {
   return hasMathKeywords || hasMathExpression || hasGeoKeywords;
 }
 
-function classifyAndRespond(message, session) {
+function classifyAndRespond(message, session, meta = {}) {
   const m = message.toLowerCase().trim();
 
   // Respuesta corta para confirmaciones o saludos simples
@@ -201,6 +201,18 @@ function classifyAndRespond(message, session) {
     );
   }
 
+  // Si se adjuntó captura/archivo pero el texto detectado no coincidió con una regla específica
+  if (meta.attachmentName) {
+    session.lastCategory = 'attachment_review';
+    const extracto = meta.extractedText
+      ? `\nTexto detectado en el adjunto: "${meta.extractedText.slice(0, 180).replace(/\s+/g, ' ')}"`
+      : '\nNo se detectó texto legible en el adjunto.';
+    return (
+      `Análisis de archivo (${meta.attachmentName}):${extracto}\n` +
+      'Para darte una solución exacta, dime qué mensaje de error se ve en la pantalla o en qué módulo ocurre (acceso, inscripción, entrega de actividad o red).'
+    );
+  }
+
   // Respuesta por defecto si no encaja en una regla específica
   session.lastCategory = 'general';
   return (
@@ -229,7 +241,7 @@ function handleChatRequest(req, res) {
 
     const trimmed = rawMessage.trim();
     if (!trimmed) {
-      return res.status(400).json({ error: 'Escribe un mensaje antes de enviar.' });
+      return res.status(400).json({ error: 'Escribe un mensaje o adjunta un archivo antes de enviar.' });
     }
 
     const message = trimmed.slice(0, MAX_MESSAGE_LENGTH);
@@ -243,7 +255,10 @@ function handleChatRequest(req, res) {
     }
     session.lastMessageAt = now;
 
-    const reply = classifyAndRespond(message, session);
+    const reply = classifyAndRespond(message, session, {
+      attachmentName: typeof body.attachmentName === 'string' ? body.attachmentName : null,
+      extractedText: typeof body.extractedText === 'string' ? body.extractedText : null
+    });
 
     session.history.push(
       { role: 'user', text: message, at: now },
