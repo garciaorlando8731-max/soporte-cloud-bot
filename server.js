@@ -110,11 +110,28 @@ function classifyAndRespond(message, session) {
   if (isOutOfDomain(message)) {
     session.lastCategory = 'out_of_domain';
     return (
-      'Alcance del Asistente Cloud:\n' +
+      'Mi alcance es limitado:\n' +
       'Solo estoy diseñado para brindarte ayuda de soporte técnico de la plataforma escolar; ' +
-      'NO realizo operaciones matemáticas ni respondo temas de geografía ' +
+      'NO realizo operaciones matemáticas ni respondo temas que no sean para brindar ayuda ' +
       '(salvo preguntas sobre dónde se encuentra el Departamento de Tecnologías de la Información). ' +
       '¿Presentas alguna falla de acceso, red, error HTTP o trámite?'
+    );
+  }
+
+  // Módulo de entrega / subida de actividades
+  if (
+    /\b(subir|act|activ|actividad|actividades|archivo|archivos|adjuntar|entregar|entrega|evidencia|evidencias)\b/.test(
+      m
+    )
+  ) {
+    session.lastCategory = 'assignments_upload';
+    return (
+      'Ayuda para Subir Actividades:\n' +
+      'Para orientarte mejor, ¿qué te pasa exactamente al intentar subirla? (¿Te marca error, se queda cargando, ya cerró la entrega o no te deja seleccionar archivo?)\n\n' +
+      'Mientras tanto, revisa esto:\n' +
+      '1. Formato y peso: confirma que el archivo cumpla con el formato solicitado (por ejemplo, PDF o el indicado por tu docente) y no supere el límite de tamaño.\n' +
+      '2. Fecha y sesión: verifica que la actividad siga habilitada en el periodo activo y que tu sesión no haya caducado.\n' +
+      '3. Cierre y prueba rápida: cierra el archivo si lo tienes abierto en otro programa, recarga con Ctrl + F5 o prueba en otra pestaña/red.'
     );
   }
 
@@ -182,8 +199,8 @@ function classifyAndRespond(message, session) {
   session.lastCategory = 'general';
   return (
     'Soporte Técnico Escolar:\n' +
-    'Puedo ayudarte con caídas o errores 500/502/503/504, fallas de inicio de sesión o permisos (401/403), ' +
-    'problemas de red/DNS, fallas en módulos escolares o la ubicación del Departamento de TI. ' +
+    'Mi principal funcion es brindarte ayuda e informacion sobre posibles errores en tu plataforma. ' +
+    'problemas de red, fallas en módulos escolares o la ubicación del Departamento de TI. ' +
     'Cuéntame qué mensaje o falla ves exactamente.'
   );
 }
