@@ -102,7 +102,7 @@ function classifyAndRespond(message, session) {
   if (/^(ok|okay|va|listo|gracias|hola|buenas|buen dia|buenas tardes|buenas noches)[.!]?$/i.test(m)) {
     session.lastCategory = 'greeting_ack';
     return (
-      '¡Hola! En q te puedo ayudar? ¿Qué falla o error estás viendo en la plataforma escolar o en la red para ayudarte?'
+      '¡Listo! ¿Qué falla o error estás viendo en la plataforma escolar o en la red para ayudarte?'
     );
   }
 
@@ -123,23 +123,6 @@ function classifyAndRespond(message, session) {
       'NO realizo operaciones matemáticas ni respondo temas que no sean para brindar ayuda ' +
       '(salvo preguntas sobre dónde se encuentra el Departamento de Tecnologías de la Información). ' +
       '¿Presentas alguna falla de acceso, red, error HTTP o trámite?'
-    );
-  }
-
-  // Módulo de entrega / subida de actividades
-  if (
-    /\b(subir|act|activ|actividad|actividades|archivo|archivos|adjuntar|entregar|entrega|evidencia|evidencias)\b/.test(
-      m
-    )
-  ) {
-    session.lastCategory = 'assignments_upload';
-    return (
-      'Ayuda para Subir Actividades:\n' +
-      'Para orientarte mejor, ¿qué te pasa exactamente al intentar subirla? (¿Te marca error, se queda cargando, ya cerró la entrega o no te deja seleccionar archivo?)\n\n' +
-      'Mientras tanto, revisa esto:\n' +
-      '1. Formato y peso: confirma que el archivo cumpla con el formato solicitado (por ejemplo, PDF o el indicado por tu docente) y no supere el límite de tamaño.\n' +
-      '2. Fecha y sesión: verifica que la actividad siga habilitada en el periodo activo y que tu sesión no haya caducado.\n' +
-      '3. Cierre y prueba rápida: cierra el archivo si lo tienes abierto en otro programa, recarga con Ctrl + F5 o prueba en otra pestaña/red.'
     );
   }
 
@@ -188,9 +171,24 @@ function classifyAndRespond(message, session) {
     );
   }
 
+  // Módulo de inscripción / alta a cursos
+  if (
+    /\b(inscribir|inscribirme|inscripcion|curso|cursos|matricular|matricularme|alta|darme de alta|clase|clases)\b/.test(
+      m
+    )
+  ) {
+    session.lastCategory = 'course_enrollment';
+    return (
+      'Ayuda para Inscripción a Cursos:\n' +
+      '1. El curso tal vez está cerrado temporalmente; deja que tu profesor lo active.\n' +
+      '2. Pregúntale a tu profesor la contraseña en caso de tener.\n' +
+      '3. El curso aún no está activado para poderse dar de alta.'
+    );
+  }
+
   // Módulo 4: Académico / Plataforma escolar / Trámites
   if (
-    /\b(materia|materias|calificacion|calificaciones|boleta|horario|inscripcion|reinscripcion|tarea|examen|moodle|plataforma|portal|escolar|404)\b/.test(
+    /\b(materia|materias|calificacion|calificaciones|boleta|horario|reinscripcion|tarea|examen|moodle|plataforma|portal|escolar|404)\b/.test(
       m
     )
   ) {
