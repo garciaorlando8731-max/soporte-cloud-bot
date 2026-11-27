@@ -96,7 +96,15 @@ function isOutOfDomain(text) {
 }
 
 function classifyAndRespond(message, session) {
-  const m = message.toLowerCase();
+  const m = message.toLowerCase().trim();
+
+  // Respuesta corta para confirmaciones o saludos simples
+  if (/^(ok|okay|va|listo|gracias|hola|buenas|buen dia|buenas tardes|buenas noches)[.!]?$/i.test(m)) {
+    session.lastCategory = 'greeting_ack';
+    return (
+      '¡Listo! ¿Qué falla o error estás viendo en la plataforma escolar o en la red para ayudarte?'
+    );
+  }
 
   if (isItLocationQuestion(message)) {
     session.lastCategory = 'it_location';
@@ -199,7 +207,7 @@ function classifyAndRespond(message, session) {
   session.lastCategory = 'general';
   return (
     'Soporte Técnico Escolar:\n' +
-    'Mi principal funcion es brindarte ayuda e informacion sobre posibles errores en tu plataforma. ' +
+    'Mi principal función es brindarte ayuda e información sobre posibles errores en tu plataforma, ' +
     'problemas de red, fallas en módulos escolares o la ubicación del Departamento de TI. ' +
     'Cuéntame qué mensaje o falla ves exactamente.'
   );
