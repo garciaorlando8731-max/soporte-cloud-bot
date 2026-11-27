@@ -126,6 +126,21 @@ function classifyAndRespond(message, session, meta = {}) {
     );
   }
 
+  // Módulo de recuperación de contraseña / cuenta bloqueada
+  if (
+    /\b(olvide|olvidar|recuperar|restablecer|cambiar|bloqueo|bloqueada|bloqueado|contrasena|contraseña|password|correo de recuperacion)\b/.test(
+      m
+    )
+  ) {
+    session.lastCategory = 'password_recovery';
+    return (
+      'Ayuda con Contraseña y Cuenta Bloqueada:\n' +
+      '1. Usa la opción "¿Olvidaste tu contraseña?" en el acceso y revisa tu bandeja de entrada o correo no deseado (spam).\n' +
+      '2. Si tu cuenta se bloqueó por varios intentos, espera unos minutos antes de volver a intentar.\n' +
+      '3. Si no te llega el enlace o sigue bloqueada, repórtalo a Sistemas / TI con tu matrícula y nombre completo.'
+    );
+  }
+
   // Módulo 1: Infraestructura / Caídas / Errores 5xx
   if (
     /\b(caida|caido|cayo|no carga|no abre|500|502|503|504|bad gateway|gateway timeout|servidor|cloud|instancia|saturad|lento|lenta|no jala)\b/.test(
@@ -143,7 +158,7 @@ function classifyAndRespond(message, session, meta = {}) {
 
   // Módulo 2: Autenticación / Permisos / 4xx / SSL / CORS
   if (
-    /\b(login|iniciar sesion|sesion|contrasena|password|usuario|matricula|token|401|403|419|unauthorized|forbidden|ssl|certificado|cors|bloquead|acceso)\b/.test(
+    /\b(login|iniciar sesion|sesion|usuario|matricula|token|401|403|419|unauthorized|forbidden|ssl|certificado|cors|acceso)\b/.test(
       m
     )
   ) {
@@ -186,6 +201,23 @@ function classifyAndRespond(message, session, meta = {}) {
     );
   }
 
+  // Módulo de entrega / subida de actividades
+  if (
+    /\b(subir|act|activ|actividad|actividades|archivo|archivos|adjuntar|entregar|entrega|evidencia|evidencias)\b/.test(
+      m
+    )
+  ) {
+    session.lastCategory = 'assignments_upload';
+    return (
+      'Ayuda para Subir Actividades:\n' +
+      'Para orientarte mejor, ¿qué te pasa exactamente al intentar subirla? (¿Te marca error, se queda cargando, ya cerró la entrega o no te deja seleccionar archivo?)\n\n' +
+      'Mientras tanto, revisa esto:\n' +
+      '1. Formato y peso: confirma que el archivo cumpla con el formato solicitado (por ejemplo, PDF o el indicado por tu docente) y no supere el límite de tamaño.\n' +
+      '2. Fecha y sesión: verifica que la actividad siga habilitada en el periodo activo y que tu sesión no haya caducado.\n' +
+      '3. Cierre y prueba rápida: cierra el archivo si lo tienes abierto en otro programa, recarga con Ctrl + F5 o prueba en otra pestaña/red.'
+    );
+  }
+
   // Módulo 4: Académico / Plataforma escolar / Trámites
   if (
     /\b(materia|materias|calificacion|calificaciones|boleta|horario|reinscripcion|tarea|examen|moodle|plataforma|portal|escolar|404)\b/.test(
@@ -206,7 +238,7 @@ function classifyAndRespond(message, session, meta = {}) {
     session.lastCategory = 'attachment_review';
     const extracto = meta.extractedText
       ? `\nTexto detectado en el adjunto: "${meta.extractedText.slice(0, 180).replace(/\s+/g, ' ')}"`
-      : '\nNo se detectó texto legible en el adjunto.';
+      : '\nArchivo recibido (documento o captura sin texto extraído).';
     return (
       `Análisis de archivo (${meta.attachmentName}):${extracto}\n` +
       'Para darte una solución exacta, dime qué mensaje de error se ve en la pantalla o en qué módulo ocurre (acceso, inscripción, entrega de actividad o red).'
