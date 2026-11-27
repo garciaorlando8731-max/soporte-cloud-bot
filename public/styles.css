@@ -24,10 +24,29 @@ body {
 .chat-header {
   background: #004080;
   color: white;
-  padding: 15px;
-  text-align: center;
+  padding: 12px 15px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
   font-weight: bold;
-  font-size: 1.1rem;
+  font-size: 1rem;
+}
+
+.btn-nuevo-chat {
+  background: rgba(255, 255, 255, 0.16);
+  color: white;
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  border-radius: 6px;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.btn-nuevo-chat:hover:not(:disabled) {
+  background: rgba(255, 255, 255, 0.28);
 }
 
 .bot-avatar-bar {
@@ -101,6 +120,30 @@ body {
   border-radius: 20px 20px 6px 20px;
   box-shadow: 0 3px 8px rgba(0, 64, 128, 0.18);
   animation: aparecerNube 0.25s ease-out;
+}
+
+.quick-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-top: 1px solid #e2e8f0;
+}
+
+.chip-btn {
+  background: #e0f2fe;
+  color: #0369a1;
+  border: 1px solid #bae6fd;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.chip-btn:hover:not(:disabled) {
+  background: #bae6fd;
 }
 
 .archivo-preview {

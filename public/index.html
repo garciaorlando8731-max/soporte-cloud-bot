@@ -9,7 +9,10 @@
 <body>
   <div class="chat-container">
     <div class="chat-header">
-      🛠️ Centro de Soporte Cloud de la Plataforma Escolar
+      <span>🛠️ Centro de Soporte Cloud de la Plataforma Escolar</span>
+      <button id="btnNuevoChat" class="btn-nuevo-chat" type="button" title="Iniciar nueva conversación">
+        Nueva chat
+      </button>
     </div>
 
     <div class="bot-avatar-bar">
@@ -32,6 +35,14 @@
       </div>
     </div>
 
+    <div class="quick-actions" aria-label="Consultas rápidas">
+      <button class="chip-btn" type="button" data-prompt="No carga la plataforma, me sale error 502">Caída / 502</button>
+      <button class="chip-btn" type="button" data-prompt="No me deja inscribirme a un curso">Inscripción</button>
+      <button class="chip-btn" type="button" data-prompt="No puedo subir mi actividad">Subir archivo</button>
+      <button class="chip-btn" type="button" data-prompt="Olvidé mi contraseña y se bloqueó mi cuenta">Contraseña</button>
+      <button class="chip-btn" type="button" data-prompt="Dónde queda el departamento de sistemas o TI">Ubicación TI</button>
+    </div>
+
     <div id="archivoPreview" class="archivo-preview" hidden>
       <span id="archivoNombre"></span>
       <button id="btnQuitarArchivo" type="button" title="Quitar archivo">✕</button>
@@ -41,11 +52,11 @@
       <input
         type="file"
         id="fileInput"
-        accept="image/*,.txt,.log,.csv"
+        accept="image/*,.doc,.docx,.ppt,.pptx,.xls,.xlsx,.csv,.pdf,.txt,.log,.md,.json"
         hidden
       >
-      <button id="btnAdjuntar" type="button" title="Adjuntar captura o archivo">📎</button>
-      <input type="text" id="userInput" placeholder="Ej: La plataforma se cayó..." autofocus>
+      <button id="btnAdjuntar" type="button" title="Adjuntar captura, Word, PowerPoint, Excel, PDF o archivo">📎</button>
+      <input type="text" id="userInput" maxlength="2000" placeholder="Ej: La plataforma se cayó..." autofocus>
       <button id="btnEnviar" type="button">Enviar</button>
     </div>
   </div>

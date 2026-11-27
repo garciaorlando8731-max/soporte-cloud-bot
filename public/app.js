@@ -2,13 +2,17 @@ const chatMessages = document.getElementById('chatMessages');
 const userInput = document.getElementById('userInput');
 const btnEnviar = document.getElementById('btnEnviar');
 const btnAdjuntar = document.getElementById('btnAdjuntar');
+const btnNuevoChat = document.getElementById('btnNuevoChat');
 const fileInput = document.getElementById('fileInput');
 const archivoPreview = document.getElementById('archivoPreview');
 const archivoNombre = document.getElementById('archivoNombre');
 const btnQuitarArchivo = document.getElementById('btnQuitarArchivo');
+const chipButtons = document.querySelectorAll('.chip-btn');
 
-const REQUEST_TIMEOUT_MS = 35000; // Un poco más amplio por si OCR + Render Free tardan
-const MAX_FILE_BYTES = 2 * 1024 * 1024; // 2 MB
+const REQUEST_TIMEOUT_MS = 35000;
+const MAX_FILE_BYTES = 5 * 1024 * 1024;
+const WELCOME_TEXT =
+  '👋 Hola. Si la plataforma escolar presenta fallas o caídas imprevistas, escribe tu problema o adjunta una captura/archivo aquí para recibir asistencia automática.';
 
 let sessionId = localStorage.getItem('soporte_session_id') || null;
 let estaEnviando = false;
@@ -61,9 +65,15 @@ function cambiarEstadoCarga(cargando) {
   if (btnQuitarArchivo) {
     btnQuitarArchivo.disabled = cargando;
   }
+  if (btnNuevoChat) {
+    btnNuevoChat.disabled = cargando;
+  }
   if (userInput) {
     userInput.disabled = cargando;
   }
+  chipButtons.forEach((btn) => {
+    btn.disabled = cargando;
+  });
 }
 
 function limpiarArchivo() {
@@ -71,6 +81,19 @@ function limpiarArchivo() {
   if (fileInput) fileInput.value = '';
   if (archivoNombre) archivoNombre.textContent = '';
   if (archivoPreview) archivoPreview.hidden = true;
+}
+
+function reiniciarConversacion() {
+  if (estaEnviando || !chatMessages) return;
+  sessionId = null;
+  localStorage.removeItem('soporte_session_id');
+  limpiarArchivo();
+  chatMessages.innerHTML = '';
+  agregarMensaje(WELCOME_TEXT, 'bot');
+  if (userInput) {
+    userInput.value = '';
+    userInput.focus();
+  }
 }
 
 function leerArchivoTexto(file) {
@@ -82,20 +105,32 @@ function leerArchivoTexto(file) {
   });
 }
 
+function esArchivoTextoLegible(file) {
+  const nombre = (file.name || '').toLowerCase();
+  return (
+    file.type.startsWith('text/') ||
+    /\.(txt|log|csv|md|json)$/.test(nombre)
+  );
+}
+
 async function leerArchivoAdjunto(file) {
-  const esImagen = file.type.startsWith('image/');
-  if (!esImagen) {
+  const esImagen = file.type.startsWith('image/') || /\.(png|jpe?g|gif|webp|bmp)$/i.test(file.name || '');
+
+  if (esImagen) {
+    if (typeof window.Tesseract === 'undefined') {
+      throw new Error('El lector de imágenes no cargó en la página.');
+    }
+    mostrarEscribiendo('Leyendo texto de la captura...');
+    const { data } = await window.Tesseract.recognize(file, 'spa+eng');
+    return String((data && data.text) || '').trim().slice(0, 1500);
+  }
+
+  if (esArchivoTextoLegible(file)) {
     const contenido = await leerArchivoTexto(file);
     return contenido.slice(0, 1500);
   }
 
-  if (typeof window.Tesseract === 'undefined') {
-    throw new Error('El lector de imágenes no cargó en la página.');
-  }
-
-  mostrarEscribiendo('Leyendo texto de la captura...');
-  const { data } = await window.Tesseract.recognize(file, 'spa+eng');
-  return String((data && data.text) || '').trim().slice(0, 1500);
+  return `Archivo adjunto: ${file.name} (documento/ofimática).`;
 }
 
 if (btnAdjuntar && fileInput) {
@@ -108,7 +143,7 @@ if (btnAdjuntar && fileInput) {
     if (!file) return;
 
     if (file.size > MAX_FILE_BYTES) {
-      agregarMensaje('El archivo supera el límite de 2 MB. Elige una captura o archivo más ligero.', 'bot');
+      agregarMensaje('El archivo supera el límite de 5 MB. Elige un archivo más ligero.', 'bot');
       limpiarArchivo();
       return;
     }
@@ -129,6 +164,20 @@ if (btnQuitarArchivo) {
   });
 }
 
+if (btnNuevoChat) {
+  btnNuevoChat.addEventListener('click', reiniciarConversacion);
+}
+
+chipButtons.forEach((btn) => {
+  btn.addEventListener('click', () => {
+    if (estaEnviando || !userInput) return;
+    const prompt = btn.getAttribute('data-prompt') || '';
+    if (!prompt) return;
+    userInput.value = prompt;
+    enviarMensaje();
+  });
+});
+
 async function enviarMensaje() {
   if (estaEnviando || !userInput) return;
 
@@ -137,14 +186,14 @@ async function enviarMensaje() {
 
   const archivoActual = archivoSeleccionado;
   const resumenUsuario = archivoActual
-    ? `${textoUsuario || 'Revisar captura/archivo adjunto'}\n[Adjunto: ${archivoActual.name}]`
+    ? `${textoUsuario || 'Revisar archivo adjunto'}\n[Adjunto: ${archivoActual.name}]`
     : textoUsuario;
 
   agregarMensaje(resumenUsuario, 'user');
   userInput.value = '';
   limpiarArchivo();
   cambiarEstadoCarga(true);
-  mostrarEscribiendo(archivoActual ? 'Analizando archivo y enviando...' : 'Escribiendo...');
+  mostrarEscribiendo(archivoActual ? 'Preparando archivo y enviando...' : 'Escribiendo...');
 
   let textoExtraido = '';
   if (archivoActual) {
@@ -153,7 +202,7 @@ async function enviarMensaje() {
     } catch (err) {
       quitarEscribiendo();
       agregarMensaje(
-        `No pude leer el contenido de "${archivoActual.name}". Intenta con otra captura más nítida o describe el error.`,
+        `No pude leer "${archivoActual.name}". Intenta con otro archivo o describe qué te ocurre.`,
         'bot'
       );
       cambiarEstadoCarga(false);
@@ -162,9 +211,14 @@ async function enviarMensaje() {
     }
   }
 
-  const mensajeFinal = textoExtraido
-    ? `${textoUsuario || 'Analiza esta captura o archivo de error:'}\n\n[Contenido detectado en ${archivoActual.name}]:\n${textoExtraido}`
-    : textoUsuario;
+  const esOfimatica =
+    archivoActual &&
+    /\.(doc|docx|ppt|pptx|xls|xlsx|pdf)$/i.test(archivoActual.name || '');
+
+  const mensajeFinal =
+    textoExtraido && !esOfimatica
+      ? `${textoUsuario || 'Analiza este archivo:'}\n\n[Contenido detectado en ${archivoActual.name}]:\n${textoExtraido}`
+      : textoUsuario || `Tengo un problema con el archivo ${archivoActual.name}`;
 
   mostrarEscribiendo('Escribiendo...');
 
@@ -180,7 +234,7 @@ async function enviarMensaje() {
       body: JSON.stringify({
         message: mensajeFinal,
         attachmentName: archivoActual ? archivoActual.name : null,
-        extractedText: textoExtraido || null,
+        extractedText: esOfimatica ? null : textoExtraido || null,
         sessionId: sessionId
       }),
       signal: controller.signal
