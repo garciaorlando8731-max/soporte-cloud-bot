@@ -102,7 +102,7 @@ function classifyAndRespond(message, session) {
   if (/^(ok|okay|va|listo|gracias|hola|buenas|buen dia|buenas tardes|buenas noches)[.!]?$/i.test(m)) {
     session.lastCategory = 'greeting_ack';
     return (
-      '¡Listo! ¿Qué falla o error estás viendo en la plataforma escolar o en la red para ayudarte?'
+      '¡Hola! En q te puedo ayudar? ¿Qué falla o error estás viendo en la plataforma escolar o en la red para ayudarte?'
     );
   }
 
