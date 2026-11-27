@@ -68,7 +68,6 @@ body {
   white-space: pre-line;
 }
 
-/* Nubes para mensajes del bot */
 .bot-msg,
 .mensaje-bot {
   background: #e0f2fe;
@@ -87,7 +86,6 @@ body {
   animation: aparecerNube 0.25s ease-out;
 }
 
-/* Nubes / burbujas para mensajes del usuario */
 .user-msg,
 .mensaje-usuario {
   background: #004080;
@@ -105,14 +103,55 @@ body {
   animation: aparecerNube 0.25s ease-out;
 }
 
+.archivo-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 12px;
+  background: #eff6ff;
+  border-top: 1px solid #bfdbfe;
+  font-size: 0.85rem;
+  color: #1e3a8a;
+}
+
+.archivo-preview[hidden] {
+  display: none;
+}
+
+.archivo-preview button {
+  background: transparent;
+  border: none;
+  color: #1e3a8a;
+  cursor: pointer;
+  font-weight: bold;
+  padding: 2px 6px;
+}
+
 .chat-input-area {
   display: flex;
+  align-items: center;
   padding: 10px;
   background: white;
   border-top: 1px solid #ddd;
 }
 
-.chat-input-area input {
+#btnAdjuntar {
+  background: #e2e8f0;
+  color: #0f172a;
+  border: none;
+  padding: 10px 12px;
+  margin-right: 8px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+#btnAdjuntar:hover:not(:disabled) {
+  background: #cbd5e1;
+}
+
+.chat-input-area input[type="text"] {
   flex: 1;
   padding: 10px;
   border: 1px solid #ccc;
@@ -121,7 +160,7 @@ body {
   font-size: 0.95rem;
 }
 
-.chat-input-area button {
+#btnEnviar {
   background: #004080;
   color: white;
   border: none;
@@ -132,8 +171,14 @@ body {
   font-weight: bold;
 }
 
-.chat-input-area button:hover {
+#btnEnviar:hover:not(:disabled) {
   background: #002b5c;
+}
+
+button:disabled,
+input:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
 }
 
 @keyframes flotarRobot {

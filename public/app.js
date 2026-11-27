@@ -1,10 +1,18 @@
 const chatMessages = document.getElementById('chatMessages');
 const userInput = document.getElementById('userInput');
 const btnEnviar = document.getElementById('btnEnviar');
+const btnAdjuntar = document.getElementById('btnAdjuntar');
+const fileInput = document.getElementById('fileInput');
+const archivoPreview = document.getElementById('archivoPreview');
+const archivoNombre = document.getElementById('archivoNombre');
+const btnQuitarArchivo = document.getElementById('btnQuitarArchivo');
 
-const REQUEST_TIMEOUT_MS = 25000; // 25s por si Render Free está despertando
+const REQUEST_TIMEOUT_MS = 35000; // Un poco más amplio por si OCR + Render Free tardan
+const MAX_FILE_BYTES = 2 * 1024 * 1024; // 2 MB
+
 let sessionId = localStorage.getItem('soporte_session_id') || null;
 let estaEnviando = false;
+let archivoSeleccionado = null;
 
 function agregarMensaje(texto, tipo = 'bot') {
   if (!chatMessages) return null;
@@ -18,21 +26,20 @@ function agregarMensaje(texto, tipo = 'bot') {
   return div;
 }
 
-function mostrarEscribiendo() {
+function mostrarEscribiendo(texto = 'Escribiendo...') {
   if (!chatMessages) return null;
 
-  // Evita duplicar el indicador si ya existe
-  const existente = document.getElementById('indicadorEscribiendo');
-  if (existente) return existente;
+  let existente = document.getElementById('indicadorEscribiendo');
+  if (!existente) {
+    existente = document.createElement('div');
+    existente.id = 'indicadorEscribiendo';
+    existente.className = 'message bot-msg mensaje-bot';
+    chatMessages.appendChild(existente);
+  }
 
-  const div = document.createElement('div');
-  div.id = 'indicadorEscribiendo';
-  div.className = 'message bot-msg mensaje-bot';
-  div.textContent = 'Escribiendo...';
-
-  chatMessages.appendChild(div);
+  existente.textContent = texto;
   chatMessages.scrollTop = chatMessages.scrollHeight;
-  return div;
+  return existente;
 }
 
 function quitarEscribiendo() {
@@ -48,21 +55,118 @@ function cambiarEstadoCarga(cargando) {
     btnEnviar.disabled = cargando;
     btnEnviar.textContent = cargando ? 'Enviando...' : 'Enviar';
   }
+  if (btnAdjuntar) {
+    btnAdjuntar.disabled = cargando;
+  }
+  if (btnQuitarArchivo) {
+    btnQuitarArchivo.disabled = cargando;
+  }
   if (userInput) {
     userInput.disabled = cargando;
   }
 }
 
+function limpiarArchivo() {
+  archivoSeleccionado = null;
+  if (fileInput) fileInput.value = '';
+  if (archivoNombre) archivoNombre.textContent = '';
+  if (archivoPreview) archivoPreview.hidden = true;
+}
+
+function leerArchivoTexto(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result || ''));
+    reader.onerror = () => reject(new Error('No se pudo leer el archivo de texto.'));
+    reader.readAsText(file);
+  });
+}
+
+async function leerArchivoAdjunto(file) {
+  const esImagen = file.type.startsWith('image/');
+  if (!esImagen) {
+    const contenido = await leerArchivoTexto(file);
+    return contenido.slice(0, 1500);
+  }
+
+  if (typeof window.Tesseract === 'undefined') {
+    throw new Error('El lector de imágenes no cargó en la página.');
+  }
+
+  mostrarEscribiendo('Leyendo texto de la captura...');
+  const { data } = await window.Tesseract.recognize(file, 'spa+eng');
+  return String((data && data.text) || '').trim().slice(0, 1500);
+}
+
+if (btnAdjuntar && fileInput) {
+  btnAdjuntar.addEventListener('click', () => {
+    if (!estaEnviando) fileInput.click();
+  });
+
+  fileInput.addEventListener('change', () => {
+    const file = fileInput.files && fileInput.files[0];
+    if (!file) return;
+
+    if (file.size > MAX_FILE_BYTES) {
+      agregarMensaje('El archivo supera el límite de 2 MB. Elige una captura o archivo más ligero.', 'bot');
+      limpiarArchivo();
+      return;
+    }
+
+    archivoSeleccionado = file;
+    if (archivoNombre) {
+      archivoNombre.textContent = `📎 ${file.name} (${Math.max(1, Math.round(file.size / 1024))} KB)`;
+    }
+    if (archivoPreview) {
+      archivoPreview.hidden = false;
+    }
+  });
+}
+
+if (btnQuitarArchivo) {
+  btnQuitarArchivo.addEventListener('click', () => {
+    if (!estaEnviando) limpiarArchivo();
+  });
+}
+
 async function enviarMensaje() {
   if (estaEnviando || !userInput) return;
 
-  const texto = userInput.value.trim();
-  if (!texto) return;
+  const textoUsuario = userInput.value.trim();
+  if (!textoUsuario && !archivoSeleccionado) return;
 
-  agregarMensaje(texto, 'user');
+  const archivoActual = archivoSeleccionado;
+  const resumenUsuario = archivoActual
+    ? `${textoUsuario || 'Revisar captura/archivo adjunto'}\n[Adjunto: ${archivoActual.name}]`
+    : textoUsuario;
+
+  agregarMensaje(resumenUsuario, 'user');
   userInput.value = '';
+  limpiarArchivo();
   cambiarEstadoCarga(true);
-  mostrarEscribiendo();
+  mostrarEscribiendo(archivoActual ? 'Analizando archivo y enviando...' : 'Escribiendo...');
+
+  let textoExtraido = '';
+  if (archivoActual) {
+    try {
+      textoExtraido = await leerArchivoAdjunto(archivoActual);
+    } catch (err) {
+      quitarEscribiendo();
+      agregarMensaje(
+        `No pude leer el contenido de "${archivoActual.name}". Intenta con otra captura más nítida o describe el error.`,
+        'bot'
+      );
+      cambiarEstadoCarga(false);
+      userInput.focus();
+      return;
+    }
+  }
+
+  const mensajeFinal = textoExtraido
+    ? `${textoUsuario || 'Analiza esta captura o archivo de error:'}\n\n[Contenido detectado en ${archivoActual.name}]:\n${textoExtraido}`
+    : textoUsuario;
+
+  mostrarEscribiendo('Escribiendo...');
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
@@ -74,7 +178,9 @@ async function enviarMensaje() {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        message: texto,
+        message: mensajeFinal,
+        attachmentName: archivoActual ? archivoActual.name : null,
+        extractedText: textoExtraido || null,
         sessionId: sessionId
       }),
       signal: controller.signal

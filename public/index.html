@@ -14,19 +14,13 @@
 
     <div class="bot-avatar-bar">
       <svg class="robot-cloud" viewBox="0 0 120 80" width="64" height="44" aria-label="Robot de soporte cloud">
-        <!-- Nube de fondo suave -->
         <path d="M28 62h64a16 16 0 0 0 2-32 22 22 0 0 0-42-6 14 14 0 0 0-24 10 14 14 0 0 0 0 28z" fill="#dbeafe"/>
-        <!-- Antena -->
         <line x1="60" y1="14" x2="60" y2="23" stroke="#004080" stroke-width="3" stroke-linecap="round"/>
         <circle cx="60" cy="12" r="4" fill="#2563eb"/>
-        <!-- Cabeza del robot -->
         <rect x="38" y="23" width="44" height="32" rx="9" fill="#004080"/>
-        <!-- Visor / pantalla -->
         <rect x="44" y="30" width="32" height="16" rx="5" fill="#0f172a"/>
-        <!-- Ojos -->
         <circle cx="53" cy="38" r="3.5" fill="#38bdf8"/>
         <circle cx="67" cy="38" r="3.5" fill="#38bdf8"/>
-        <!-- Boca -->
         <line x1="54" y1="43" x2="66" y2="43" stroke="#93c5fd" stroke-width="2" stroke-linecap="round"/>
       </svg>
       <span class="bot-status-text">Asistente Cloud en línea</span>
@@ -34,16 +28,29 @@
 
     <div id="chatMessages" class="chat-messages">
       <div class="message bot-msg mensaje-bot nube-bot">
-        👋 Hola. Si la plataforma escolar presenta fallas o caídas imprevistas, escribe tu problema aquí para recibir asistencia automática.
+        👋 Hola. Si la plataforma escolar presenta fallas o caídas imprevistas, escribe tu problema o adjunta una captura/archivo aquí para recibir asistencia automática.
       </div>
     </div>
 
+    <div id="archivoPreview" class="archivo-preview" hidden>
+      <span id="archivoNombre"></span>
+      <button id="btnQuitarArchivo" type="button" title="Quitar archivo">✕</button>
+    </div>
+
     <div class="chat-input-area">
+      <input
+        type="file"
+        id="fileInput"
+        accept="image/*,.txt,.log,.csv"
+        hidden
+      >
+      <button id="btnAdjuntar" type="button" title="Adjuntar captura o archivo">📎</button>
       <input type="text" id="userInput" placeholder="Ej: La plataforma se cayó..." autofocus>
       <button id="btnEnviar" type="button">Enviar</button>
     </div>
   </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
